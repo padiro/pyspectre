@@ -1,4 +1,19 @@
-""" Python interface for Cadence Spectre """
+"""Python Interface for Cadence Spectre
+
+This module provides a Python interface to interact with the Cadence Spectre simulator, 
+allowing for the creation, execution, and analysis of Spectre simulations. It includes 
+functionality for managing netlists, running simulations, and reading simulation results 
+in a structured format (pandas DataFrames). Temporary file handling and log management 
+are also integrated.
+
+Key Features:
+-------------
+- Create and manipulate netlists.
+- Run Spectre simulations with temporary or specified raw and log files.
+- Retrieve simulation results as pandas DataFrames for further analysis.
+- Support for interactive Spectre sessions and simulation customization.
+"""
+
 
 import os
 import yaml
@@ -17,8 +32,21 @@ from pynut import read_raw, plot_dict
 
 
 def netlist_to_tmp(netlist: str) -> str:
-    """
-    Write a netlist to a temporary file
+    """Write a netlist to a temporary file with an `.scs` suffix.
+
+    This function creates a temporary file with a `.scs` suffix and writes the provided 
+    netlist content to it. The file is not deleted upon closure, ensuring it persists 
+    until manually removed.
+
+    Parameters
+    ----------
+    netlist : str
+        The netlist content to be written into the temporary file.
+
+    Returns
+    -------
+    str
+        The full path to the created temporary netlist file.
     """
     tmp = NamedTemporaryFile(mode='w', suffix='.scs', delete=False)
     path = tmp.name
@@ -28,8 +56,21 @@ def netlist_to_tmp(netlist: str) -> str:
 
 
 def raw_tmp(net_path: str) -> str:
-    """
-    Raw simulation results in /tmp
+    """Generate a temporary file path for storing raw simulation results.
+
+    This function creates a temporary file in the `/tmp` directory with a name
+    derived from the given netlist path and a `.raw` suffix, suitable for storing 
+    simulation results.
+
+    Parameters
+    ----------
+    net_path : str
+        The file path to the netlist, which will be used as the base name for the temporary file.
+
+    Returns
+    -------
+    str
+        The full path to the temporary file created with a `.raw` suffix.
     """
     pre = f'{os.path.splitext(os.path.basename(net_path))[0]}'
     suf = '.raw'
@@ -40,8 +81,20 @@ def raw_tmp(net_path: str) -> str:
 
 
 def log_fifo(log_path: str) -> str:
-    """
-    Create fifo buffer for spectre log file
+    """Create a FIFO (First In First Out) buffer for a Spectre log file.
+
+    This function creates a FIFO buffer (named pipe) for logging the Spectre simulator's output
+    and starts a background process that discards the log contents.
+
+    Parameters
+    ----------
+    log_path : str
+        The base path (without extension) where the FIFO log file will be created.
+
+    Returns
+    -------
+    str
+        The full path to the created FIFO log file (with `.log` extension).
     """
     path = f'{log_path}.log'
     mode = 0o600
@@ -51,8 +104,31 @@ def log_fifo(log_path: str) -> str:
 
 
 def read_results(raw_file: str, offset: int = 0) -> Dict[str, DataFrame]:
-    """
-    Read simulation results
+    """Read simulation results from a raw file.
+
+    This function reads and processes simulation data from a raw result file, starting
+    at a specified offset. The results are returned as a dictionary of pandas DataFrames
+    where the keys represent different types of simulation data.
+
+    Parameters
+    ----------
+    raw_file : str
+        The path to the raw simulation result file.
+    offset : int, optional
+        The byte offset from which to start reading the results, by default 0.
+
+    Returns
+    -------
+    Dict[str, pandas.DataFrame]
+        A dictionary containing simulation results, where the keys are the names
+        of the data categories, and the values are pandas DataFrames with the corresponding data.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the raw file does not exist at the specified path.
+    PermissionError
+        If the raw file is not readable due to insufficient permissions.
     """
     if not os.path.isfile(raw_file):
         raise (FileNotFoundError(errno.ENOENT,
@@ -65,8 +141,43 @@ def read_results(raw_file: str, offset: int = 0) -> Dict[str, DataFrame]:
 
 def simulate(netlist_path: str, includes: List[str] = None, raw_path: str = None,
              log_path: str = None, log_silent=True) -> Dict[str, DataFrame]:
-    """
-    Passes the given netlist path to spectre and reads the results in.
+    """Run a Spectre simulation with the provided netlist and return the results.
+
+    This function runs a Spectre simulation using the netlist at the specified path, 
+    with optional include directories and raw/log file paths. The simulation results 
+    are read and returned as a dictionary of pandas DataFrames. Depending on the 
+    `log_silent` parameter, the log file can be silent or verbose.
+
+    Parameters
+    ----------
+    netlist_path : str
+        Path to the netlist file to be simulated.
+    includes : List[str], optional
+        A list of directories to include in the simulation, passed with the `-I` flag.
+    raw_path : str, optional
+        The path where the raw simulation results will be stored. If not provided,
+        a temporary path is generated.
+    log_path : str, optional
+        The path where the simulation log will be stored. If not provided, a temporary 
+        log file is created.
+    log_silent : bool, optional
+        If `True`, the log will be silent (default behavior). If `False`, the log will 
+        display detailed output.
+
+    Returns
+    -------
+    Dict[str, pandas.DataFrame]
+        A dictionary containing the simulation results, where the keys are the names 
+        of the simulation outputs and the values are pandas DataFrames with the data.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the netlist file or raw results file does not exist.
+    PermissionError
+        If the netlist or raw file cannot be read due to insufficient permissions.
+    IOError
+        If Spectre returns a non-zero exit code during the simulation process.
     """
     net = os.path.expanduser(netlist_path)
     inc = [f'-I{os.path.expanduser(i)}' for i in includes] if includes else []
@@ -110,9 +221,26 @@ def simulate(netlist_path: str, includes: List[str] = None, raw_path: str = None
 
 
 def simulate_netlist(netlist: str, **kwargs) -> Dict[str, DataFrame]:
-    """
-    Takes a netlist as text, creates a temporary file and simulates it. The
-    results are read in and all temp files will be destroyed.
+    """Simulate a netlist and return the results as a dictionary of DataFrames.
+
+    This function takes a netlist in text form, writes it to a temporary file, 
+    and runs a simulation using the provided netlist. After the simulation, 
+    the temporary netlist file is deleted, and the results are returned as a 
+    dictionary of pandas DataFrames.
+
+    Parameters
+    ----------
+    netlist : str
+        The netlist content to be simulated.
+    **kwargs : dict, optional
+        Additional keyword arguments passed to the `simulate` function, such as 
+        simulation options or parameters.
+
+    Returns
+    -------
+    Dict[str, pandas.DataFrame]
+        A dictionary containing simulation results, where the keys represent 
+        different types of simulation data and the values are pandas DataFrames.
     """
     path = netlist_to_tmp(netlist)
     ret = simulate(path, **kwargs)
@@ -316,6 +444,9 @@ def run_command(session: Session, command: str) -> bool:
             error_message = f"An error occurred while executing command '{command}': {str(e)}"
             raise RuntimeError(error_message) from e
     else:
+        # Delete tmp file that is not used anymore, if it still exists
+        if os.path.isfile(session.raw_file):
+            os.remove(session.raw_file)
         raise RuntimeError("The Spectre session is no longer active. Unable to execute command.")
 
 
