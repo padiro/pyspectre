@@ -286,7 +286,7 @@ def setup_command(path: str):
 
 def start_session(net_path: Union[str, Path], includes: Union[list[str], None] = None,
                   raw_path: Union[str, None] = None, config_path: str = '',
-                  additional_spectre_args: list[str] = []) -> Session:
+                  additional_spectre_args: list[str] = [], timeout=120) -> Session:
     """Start a Spectre interactive session.
 
     Parameters
@@ -304,6 +304,10 @@ def start_session(net_path: Union[str, Path], includes: Union[list[str], None] =
     config_path : str, optional
         Path to a yaml file that configures the spectre executable. See
         `config.yaml` as example.
+    timeout : int, optional
+        Time in seconds after which Spectre closes the session and returns a
+        timeout error. Must be large enough for long simulations.
+
     Returns
     -------
     Session
@@ -348,7 +352,7 @@ def start_session(net_path: Union[str, Path], includes: Union[list[str], None] =
 
     command = command_prefix + ' '.join(args) + command_postfix
 
-    repl = pexpect.spawn(command, timeout=120)
+    repl = pexpect.spawn(command, timeout=timeout)
     repl.delaybeforesend = 0.001
     repl.delayafterread = 0.001
 
@@ -707,7 +711,8 @@ def list_analysis_parameters(session: Session, analysis_name: str) -> list[str]:
     return re.findall(r'\("([^"]+)"\s+".*?"\)', ' '.join(raw_list))
 
 
-def get_analysis_parameter(session, analysis_name, parameter_name) -> dict[str, str]:
+def get_analysis_parameter(session: Session, analysis_name: str, parameter_name: str
+                           ) -> dict[str, str]:
     """Retrieve the attributes and their values for a specified parameter in a given analysis.
 
     This function sends a command to the Spectre session to list all attributes

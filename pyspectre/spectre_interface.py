@@ -25,16 +25,13 @@ class SpectreInterface(BaseSpectreInterface):
 
     def start_session(self, net_path: Union[str, Path], includes: Union[list[str], None] = None,
                       raw_path: Union[str, None] = None, config_path: str = '',
-                      aps_setting: Union[str, None] = None,
-                      x_setting: Union[str, None] = None):
-        if aps_setting in ["liberal", "moderate", "conservative"]:
-            args = [f" ++aps={aps_setting}"]
-        elif x_setting in ["cx", "ax", "mx", "lx", "vx"]:
+                      x_setting: Union[str, None] = None, timeout: int = 120):
+        if x_setting in ["cx", "ax", "mx", "lx", "vx"]:
             args = [f" +preset={x_setting}"]
         else:
             args = []
         self.session = ps.start_session(net_path, includes, raw_path, config_path,
-                                        additional_spectre_args=args)
+                                        additional_spectre_args=args, timeout=timeout)
 
     def run_all(self) -> Dict[str, DataFrame]:
         return ps.run_all(self.session)
@@ -70,7 +67,7 @@ class SpectreInterface(BaseSpectreInterface):
         return ps.list_analysis_parameters(self.session, analysis_name)
 
     def get_analysis_parameter(self, analysis_name: str,
-                               parameter_name: str) -> list[tuple[str, str]]:
+                               parameter_name: str) -> dict[str, str]:
         return ps.get_analysis_parameter(self.session, analysis_name, parameter_name)
 
     def set_analysis_parameter(self, analysis_name: str, parameter_name: str,
@@ -81,7 +78,7 @@ class SpectreInterface(BaseSpectreInterface):
     def create_analysis(self, analysis_type: str, analysis_name: str) -> bool:
         return ps.create_analysis(self.session, analysis_type, analysis_name)
 
-    def get_circuit_parameter(self, circuit_parameter: str) -> list[tuple[str, str]]:
+    def get_circuit_parameter(self, circuit_parameter: str) -> dict[str, str]:
         return ps.get_circuit_parameter(self.session, circuit_parameter)
 
     def set_circuit_parameter(self, circuit_parameter: str, attribute_name: str,
@@ -92,7 +89,7 @@ class SpectreInterface(BaseSpectreInterface):
         return ps.list_instance_parameters(self.session, instance_name)
 
     def get_instance_parameter(self, instance_name: str,
-                               instance_parameter: str) -> list[tuple[str, str]]:
+                               instance_parameter: str) -> dict[str, str]:
         return ps.get_instance_parameter(self.session, instance_name, instance_parameter)
 
     def set_instance_parameter(self, instance_name: str, instance_parameter: str,
