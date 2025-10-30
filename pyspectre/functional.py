@@ -286,7 +286,7 @@ def setup_command(path: str):
 
 def start_session(net_path: Union[str, Path], includes: Union[list[str], None] = None,
                   raw_path: Union[str, None] = None, config_path: str = '',
-                  additional_spectre_args: list[str] = [], timeout=120) -> Session:
+                  additional_spectre_args: list[str] = [], timeout: int = 120) -> Session:
     """Start a Spectre interactive session.
 
     Parameters
