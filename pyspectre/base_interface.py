@@ -24,7 +24,8 @@ class BaseSpectreInterface(ABC):
     @abstractmethod
     def start_session(self, net_path: Union[str, Path], includes: Union[list[str], None] = None,
                       raw_path: Union[str, None] = None, config_path: str = '',
-                      x_setting: Union[str, None] = None, timeout: int = 120) -> None:
+                      x_setting: Union[str, None] = None, timeout: int = 120,
+                      log_path: Union[str, None] = None) -> None:
         """Start a Spectre interactive session.
 
         Parameters
@@ -94,7 +95,8 @@ class BaseSpectreInterface(ABC):
 
     def __init__(self, net_path: Union[str, Path], includes: Optional[List[str]] = None,
                  raw_path: Optional[str] = None, config_path: str = '',
-                 x_setting: Optional[str] = None, timeout: int = 120):
+                 x_setting: Optional[str] = None, timeout: int = 120,
+                 log_path: Union[str, None] = None):
         """Initialize the SpectreInterface with parameters necessary for starting a session."""
         self.net_path = net_path
         self.includes = includes
@@ -102,6 +104,7 @@ class BaseSpectreInterface(ABC):
         self.config_path = config_path
         self.x_setting = x_setting
         self.timeout = timeout
+        self.log_path = log_path
 
     def __enter__(self) -> "BaseSpectreInterface":
         """Enter the runtime context and start the Spectre session.
@@ -114,7 +117,8 @@ class BaseSpectreInterface(ABC):
             raw_path=self.raw_path,
             config_path=self.config_path,
             x_setting=self.x_setting,
-            timeout=self.timeout
+            timeout=self.timeout,
+            log_path=self.log_path
         )
         return self
 

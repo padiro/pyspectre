@@ -286,7 +286,8 @@ def setup_command(path: str):
 
 def start_session(net_path: Union[str, Path], includes: Union[list[str], None] = None,
                   raw_path: Union[str, None] = None, config_path: str = '',
-                  additional_spectre_args: list[str] = [], timeout: int = 120) -> Session:
+                  additional_spectre_args: list[str] = [], timeout: int = 120,
+                  log_path: Union[str, None] = None) -> Session:
     """Start a Spectre interactive session.
 
     Parameters
@@ -334,7 +335,10 @@ def start_session(net_path: Union[str, Path], includes: Union[list[str], None] =
     fail = r'.*\nnil'
     net = Path(net_path).expanduser()
     raw = Path(raw_path) if raw_path else Path(raw_tmp(net))
-    log = log_fifo(raw.with_suffix('').as_posix())
+    if log_path:
+        log = str(log_path)
+    else:
+        log = log_fifo(raw.with_suffix('').as_posix())
     inc = [
         f'-I{Path(i).expanduser().as_posix()}' for i in includes] if includes else []
 

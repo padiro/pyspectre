@@ -25,13 +25,15 @@ class SpectreInterface(BaseSpectreInterface):
 
     def start_session(self, net_path: Union[str, Path], includes: Union[list[str], None] = None,
                       raw_path: Union[str, None] = None, config_path: str = '',
-                      x_setting: Union[str, None] = None, timeout: int = 120):
+                      x_setting: Union[str, None] = None, timeout: int = 120,
+                      log_path: Union[str, None] = None):
         if x_setting in ["cx", "ax", "mx", "lx", "vx"]:
-            args = [f" +preset={x_setting}"]
+            args = [f" +preset={x_setting} +mt=farm +lqtimeout 300"]
         else:
-            args = []
+            args = [" +mt=farm +lqtimeout 300"]
         self.session = ps.start_session(net_path, includes, raw_path, config_path,
-                                        additional_spectre_args=args, timeout=timeout)
+                                        additional_spectre_args=args, timeout=timeout,
+                                        log_path=log_path)
 
     def run_all(self) -> Dict[str, DataFrame]:
         return ps.run_all(self.session)
