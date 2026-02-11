@@ -66,7 +66,7 @@ class BaseSpectreInterface(ABC):
         pass
 
     @abstractmethod
-    def stop_session(self, remove_raw: bool = False) -> bool:
+    def stop_session(self, remove_raw: bool = True) -> bool:
         """Quit the Spectre interactive session and close the terminal.
 
         This function attempts to gracefully quit the Spectre interactive session by sending
@@ -135,7 +135,7 @@ class BaseSpectreInterface(ABC):
         Literal[False]
             False so that any exception is propagated.
         """
-        self.stop_session(remove_raw=False)
+        self.stop_session(remove_raw=True)
         return False
 
     @abstractmethod

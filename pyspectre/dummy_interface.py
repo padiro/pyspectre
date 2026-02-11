@@ -15,10 +15,11 @@ class DummySpectreInterface(BaseSpectreInterface):
     """
     def start_session(self, net_path: Union[str, Path], includes: Union[list[str], None] = None,
                       raw_path: Union[str, None] = None, config_path: str = '',
-                      x_setting: Union[str, None] = None, timeout: int = 120) -> None:
+                      x_setting: Union[str, None] = None, timeout: int = 120,
+                      log_path: Union[str, None] = None) -> None:
         pass
 
-    def stop_session(self, remove_raw: bool = False) -> bool:
+    def stop_session(self, remove_raw: bool = True) -> bool:
         return True
 
     def run_simulation(self) -> Dict[str, DataFrame]:

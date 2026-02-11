@@ -568,7 +568,7 @@ def get_parameters(session: Session, params: Iterable[str]) -> Dict[str, float]:
     return {param: get_parameter(session, param) for param in params}
 
 
-def stop_session(session, remove_raw: bool = False) -> bool:
+def stop_session(session, remove_raw: bool = True) -> bool:
     """Quit the Spectre interactive session and close the terminal.
 
     This function attempts to gracefully quit the Spectre interactive session by sending

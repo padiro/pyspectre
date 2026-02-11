@@ -53,7 +53,7 @@ class SpectreInterface(BaseSpectreInterface):
     def get_parameter(self, param: str) -> float:
         return ps.get_parameter(self.session, param)
 
-    def stop_session(self, remove_raw: bool = False) -> bool:
+    def stop_session(self, remove_raw: bool = True) -> bool:
         return ps.stop_session(self.session, remove_raw=remove_raw)
 
     def list_analyses(self) -> list[str]:
