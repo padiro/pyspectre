@@ -470,7 +470,15 @@ def run_analysis(session: Session, analysis: str) -> Dict[str, DataFrame]:
     """
     cmd = f'(sclRunAnalysis (sclGetAnalysis "{analysis}"))'
     run_command(session, cmd)
-    return read_results(session.raw_file)
+    res = read_results(session.raw_file, offset=session.offset)
+
+    offset_value = res.get('offset', 0)
+    if isinstance(offset_value, int):
+        session.offset = offset_value
+    else:
+        session.offset = 0
+
+    return {n: p for n, p in res.items() if n != 'offset'}
 
 
 def set_parameter(session: Session, param: str, value: float) -> bool:
