@@ -50,6 +50,8 @@ class BaseSpectreInterface(ABC):
         timeout : int, optional
             Time in seconds after which Spectre closes the session and returns a
             timeout error. Must be large enough for long simulations.
+        log_path : str, optional
+            Path where Cadence Spectre saves its logs.
 
         Raises
         ------
